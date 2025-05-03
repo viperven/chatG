@@ -1,0 +1,16 @@
+1. User A sends message to B
+   → insert into messages
+   → update (or upsert) lastMessages {senderId: A, receiverId: B}
+
+2. User A sends message to Group G
+   → insert into messages {groupId: G}
+   → update (or upsert) lastMessages {isGroup: true, receiverId: G}
+
+3. When loading messages:
+   → query messages with senderId + receiverId or groupId
+   → sort by createdAt DESC
+   → paginate
+
+4. When rendering chat list:
+   → fetch lastMessages sorted by updatedAt DESC
+   → populate lastMessageId
