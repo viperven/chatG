@@ -22,3 +22,16 @@
 1 : signin [login]
 2 : signup [create]
 3 : logout [logout] 
+
+
+
+dekh muje chaiye first time jab message send kre tho accept ya reject ahna chaiye 
+
+
+schema kya hoga
+
+senderId : mongodbId
+receiverIdId : mongodbId
+status : enum [ "accepeted", "rejected","blocked"]
+createdAt
+modifiedat

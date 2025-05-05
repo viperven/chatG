@@ -77,10 +77,33 @@ const validateOtpData = (req) => {
   // }
 };
 
+//message validation
 
+const validateSendMessage = (req) => {
+  const { receiverId, content, media, mediaType } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+    const customError = new Error("receiverID user ID");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+  if (!mediaType && !["text", "image", "video"].includes(mediaType)) {
+    const customError = new Error("mediaType is required or invalid mediatype");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+  if (!content) {
+    const customError = new Error("content is required");
+    customError.statusCode = 400;
+    throw customError;
+  }
+};
 
 module.exports = {
   validateSignUpData,
   validateLoginData,
   validateOtpData,
+  validateSendMessage,
 };
