@@ -32,7 +32,7 @@ app.use(
 
 //all Routes
 
-// app.use("/auth", require("./src/routes/authRoutes"));
+app.use("/auth", require("./src/routes/authRoute"));
 
 //first connect to db then start listening to api calls
 connectDB()

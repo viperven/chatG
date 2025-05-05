@@ -14,3 +14,11 @@
 4. When rendering chat list:
    → fetch lastMessages sorted by updatedAt DESC
    → populate lastMessageId
+
+
+
+## AUTHENTICATION AND AUTORIZATION
+
+1 : signin [login]
+2 : signup [create]
+3 : logout [logout] 
