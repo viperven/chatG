@@ -4,11 +4,10 @@
 //also when updating last message increase unread count by 1
 
 const MessageModel = require("../models/messageModel");
-const UserModel = require("../models/userModel");
 const LastMessageModel = require("../models/lastMessageModel");
 const friendsRequestModel = require("../models/friendsRequest");
 
-const { validateSendMessage } = require("../validation/validate");
+const { validateSendMessage, validateGetAllMessages } = require("../validation/validate");
 
 const sendMessage = async (req, res) => {
   try {
@@ -19,8 +18,8 @@ const sendMessage = async (req, res) => {
 
     const isReceiverFriend = await friendsRequestModel.findOne({
       $or: [
-        { senderId: senderId, receiverId: receiverId },
-        { senderId: receiverId, receiverId: senderId },
+        { senderId: senderId, receiverId: receiverId ,status:"accepted"},
+        { senderId: receiverId, receiverId: senderId  ,status:"accepted"},
       ],
     });
 
@@ -88,6 +87,61 @@ const sendMessage = async (req, res) => {
   }
 };
 
+// validation check senderid is valid as i am receiver id , sender and receiver should be friends and status should  be accepted
+// find all messages between sender and receiver from message collection by or condtion use limit and skip for pagination
+// also check if last message exists in db then decerement the count
+// and update the last message model with the last message id and unread count 0
+
+const getAllMessages = async (req, res) => {
+  try {
+
+    validateGetAllMessages(req);
+
+    const { senderId } = req.body;
+    const receiverId = req.user.id;
+
+    const isReceiverFriend = await friendsRequestModel.findOne({
+      $or: [
+        { senderId: senderId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: senderId },
+      ],
+    });
+
+    if (!isReceiverFriend) {
+      return res.status(400).json({
+        isSuccess: false,
+        message: "You are not friends with this user.",
+      });
+    }
+
+    const getAllMessages = await MessageModel.find({
+      $or: [
+        { senderId: senderId, receiverId: receiverId ,status:"accepted"},
+        { senderId: receiverId, receiverId: senderId  ,status:"accepted"},
+      ]
+    })
+
+   return res.status(200).json({ isSuccess: true,message: "Message fetched successfully",data: getAllMessages })
+
+  } catch (err) {
+    console.log(err?.message);
+
+    if (err.statusCode === 400) {
+      return res.status(err.statusCode).json({
+        isSuccess: false,
+        message: err.message,
+        field: err.field, // Optionally include the problematic field
+      });
+    }
+
+    res.status(500).json({
+      isSuccess: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
+  getAllMessages
 };

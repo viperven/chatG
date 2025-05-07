@@ -83,7 +83,7 @@ const validateSendMessage = (req) => {
   const { receiverId, content, media, mediaType } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(receiverId)) {
-    const customError = new Error("receiverID user ID");
+    const customError = new Error("invalid receiverID user ID");
     customError.statusCode = 400;
     throw customError;
   }
@@ -101,9 +101,21 @@ const validateSendMessage = (req) => {
   }
 };
 
+const validateGetAllMessages = (req) => {
+  const { senderId } = req.body;
+  
+  if (!mongoose.Types.ObjectId.isValid(senderId)) {
+    const customError = new Error("invalid senderId user ID");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+};
+
 module.exports = {
   validateSignUpData,
   validateLoginData,
   validateOtpData,
   validateSendMessage,
+  validateGetAllMessages
 };
