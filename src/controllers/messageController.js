@@ -1,11 +1,12 @@
 //validation check sender and receiver should be valid and should be friends and status should be accepted
 //insert message in messageModel , update last message model
+// if sending first message then create entry in friendrequestmodel with status pending
 // for last message check if last message exists in db then update that document if not then create a new one
 //also when updating last message increase unread count by 1
 
 const MessageModel = require("../models/messageModel");
 const LastMessageModel = require("../models/lastMessageModel");
-const friendsRequestModel = require("../models/friendsRequest");
+const FriendsRequestModel = require("../models/friendsRequest");
 
 const { validateSendMessage, validateGetAllMessages } = require("../validation/validate");
 
@@ -16,27 +17,24 @@ const sendMessage = async (req, res) => {
     const { receiverId, content, media, mediaType } = req.body;
     const senderId = req.user.id;
 
-    const isReceiverFriend = await friendsRequestModel.findOne({
+    const isReceiverFriend = await FriendsRequestModel.findOne({
       $or: [
-        { senderId: senderId, receiverId: receiverId ,status:"accepted"},
-        { senderId: receiverId, receiverId: senderId  ,status:"accepted"},
+        { senderId: senderId, receiverId: receiverId ,status:"pending"},
+        { senderId: receiverId, receiverId: senderId  ,status:"pending"},
       ],
     });
 
-    if (!isReceiverFriend) {
+    if (isReceiverFriend) { //if friend request is in pending state means 1 message is already send then return
       return res.status(400).json({
         isSuccess: false,
-        message: "You are not friends with this user.",
+        message: "you have already sended a message and receiver has not accepted your message yet .",
       });
     }
+    else{ //first message is for first time create a entry in friend request with status pending
+     const saveFirstMessage = await FriendsRequestModel.create({senderId, receiverId,status : "pending"});
+    }
 
-    const newMessage = new MessageModel({
-      senderId,
-      receiverId,
-      content,
-      media,
-      mediaType,
-    });
+    const newMessage = new MessageModel({ senderId, receiverId, content, media, mediaType});
 
     await newMessage.save();
 
@@ -100,7 +98,7 @@ const getAllMessages = async (req, res) => {
     const { senderId } = req.body;
     const receiverId = req.user.id;
 
-    const isReceiverFriend = await friendsRequestModel.findOne({
+    const isReceiverFriend = await FriendsRequestModel.findOne({
       $or: [
         { senderId: senderId, receiverId: receiverId },
         { senderId: receiverId, receiverId: senderId },

@@ -103,13 +103,28 @@ const validateSendMessage = (req) => {
 
 const validateGetAllMessages = (req) => {
   const { senderId } = req.body;
-  
+
+  if (!mongoose.Types.ObjectId.isValid(senderId)) {
+    const customError = new Error("invalid senderId user ID");
+    customError.statusCode = 400;
+    throw customError;
+  }
+};
+
+const validateAceptOrDeclineFriendRequest = (req) => {
+  const { senderId, status } = req.body;
+
   if (!mongoose.Types.ObjectId.isValid(senderId)) {
     const customError = new Error("invalid senderId user ID");
     customError.statusCode = 400;
     throw customError;
   }
 
+  if (!["accepted", "rejected"].includes(status)) {
+    const customError = new Error("invalid status");
+    customError.statusCode = 400;
+    throw customError;
+  }
 };
 
 module.exports = {
@@ -117,5 +132,6 @@ module.exports = {
   validateLoginData,
   validateOtpData,
   validateSendMessage,
-  validateGetAllMessages
+  validateGetAllMessages,
+  validateAceptOrDeclineFriendRequest,
 };
