@@ -1,5 +1,7 @@
 // errorValidations.js
 function handleDuplicateKeyError(error, next) {
+  console.log(error?.stack,"........................");
+  
     if (error.code === 11000) {
       // Duplicate key error code
       // Extract the field that caused the duplicate key error

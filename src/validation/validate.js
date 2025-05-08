@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const validator = require("validator");
 
 //signup validation
@@ -80,7 +81,7 @@ const validateOtpData = (req) => {
 //message validation
 
 const validateSendMessage = (req) => {
-  const { receiverId, content, media, mediaType } = req.body;
+  const { receiverId, content,mediaType } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(receiverId)) {
     const customError = new Error("invalid receiverID user ID");
@@ -102,7 +103,7 @@ const validateSendMessage = (req) => {
 };
 
 const validateGetAllMessages = (req) => {
-  const { senderId } = req.body;
+  const { senderId } = req.query;
 
   if (!mongoose.Types.ObjectId.isValid(senderId)) {
     const customError = new Error("invalid senderId user ID");

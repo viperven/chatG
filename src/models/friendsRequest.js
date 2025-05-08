@@ -28,4 +28,4 @@ const friendRequestSchema = new mongoose.Schema(
 
 friendRequestSchema.index({ senderId: 1, receiverId: 1 }, { unique: true });
 
-module.exports = mongoose.model("ChatRelationship", friendRequestSchema);
+module.exports = mongoose.model("friendRequest", friendRequestSchema);

@@ -66,7 +66,7 @@ const signUp = async (req, res) => {
   try {
     validateSignUpData(req, res); //validating request
     const { name, email, password, userOtp, age, gender, address } = req.body;
-
+    
     const isUserOtpExists = await OTP.findOne({ emailId: email });
     const isOtpExpired = checkOtpExpire(isUserOtpExists?.updatedAt);
 
@@ -164,15 +164,12 @@ const login = async (req, res) => {
 
     const safeData = {
       id: userExists._id,
-      firstName: userExists.firstName,
-      lastName: userExists.lastName,
+      firstName: userExists.name,
       gender: userExists.gender,
-      keySkills: userExists.keySkills,
-      summary: userExists.summary,
-      location: userExists.location,
+      location: userExists.address,
       age: userExists.age,
-      photoUrl: userExists.photoUrl,
-      emailID: userExists.emailID,
+      emailID: userExists.email,
+      friendsList: userExists.friends
     };
 
     res.status(200).json({

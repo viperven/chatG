@@ -33,6 +33,8 @@ app.use(
 //all Routes
 
 app.use("/auth", require("./src/routes/authRoute"));
+app.use("/message", require("./src/routes/messageRoute"));
+app.use("/request", require("./src/routes/friendRequestRoute"));
 
 //first connect to db then start listening to api calls
 connectDB()
