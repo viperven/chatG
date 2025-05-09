@@ -195,12 +195,11 @@ const deleteMessage = async (req, res) => {
 
     const { friendId, messageId } = req.body;
     const loggedInUser = req.user.id;
-    console.log(friendId, loggedInUser);
 
-    if (loggedInUser == friendId) {
+    if (loggedInUser === friendId) {
       return res.status(400).json({
         isSuccess: false,
-        message: "Invalid ! loggedin user id and friend id cant be same.",
+        message: "Invalid! Logged-in user ID and friend ID can't be the same.",
       });
     }
 
@@ -214,63 +213,78 @@ const deleteMessage = async (req, res) => {
     if (!isFriends) {
       return res.status(400).json({
         isSuccess: false,
-        message: "Invalid ! You are not friends with this user.",
+        message: "Invalid! You are not friends with this user.",
       });
     }
 
-    const ownMessageDelete = await MessageModel.findOne({ _id: messageId });
+    const message = await MessageModel.findOne({ _id: messageId });
 
-    if (!ownMessageDelete) {
+    if (!message) {
       return res.status(400).json({
         isSuccess: false,
-        message: "Invalid ! No message found with this Message Id.",
+        message: "Invalid! No message found with this Message ID.",
       });
     }
 
-    if (!(ownMessageDelete.senderId.toString() == loggedInUser && ownMessageDelete.receiverId.toString() == friendId)) {
+
+    if (message.senderId.toString() !== loggedInUser || message.receiverId.toString() !== friendId) {
       return res.status(400).json({
         isSuccess: false,
-        message: "Invalid ! You can delete only your messages.",
+        message: "Invalid! You can delete only your own messages.",
       });
     }
 
-    await MessageModel.findOneAndDelete({ _id: messageId });
-
-    const getLastMessage = await MessageModel.findOne({
+    // Check if this message is the current last message
+    const lastMessageDoc = await LastMessageModel.findOne({
       $or: [
         { senderId: friendId, receiverId: loggedInUser },
         { senderId: loggedInUser, receiverId: friendId },
       ],
-    })
-      .sort({ createdAt: -1 })
-      .limit(1);
+    });
 
-    if (!getLastMessage) {
-      // If no messages left, delete last message reference
-      await LastMessageModel.findOneAndDelete({
+    const isLastMessage = lastMessageDoc && lastMessageDoc.lastMessageId.toString() === messageId;
+
+    // Delete the message
+    await MessageModel.findByIdAndDelete(messageId);
+
+    if (isLastMessage) {
+      //if it was lastmessage update with new one
+      const newLastMessage = await MessageModel.findOne({
         $or: [
           { senderId: friendId, receiverId: loggedInUser },
           { senderId: loggedInUser, receiverId: friendId },
         ],
-      });
+      })
+        .sort({ createdAt: -1 })
+        .limit(1);
 
-      return res.status(200).json({ isSuccess: true, message: "Message Deleted successfully", data: null });
-    } else {
-      await LastMessageModel.findOneAndUpdate(
-        {
+      if (newLastMessage) {
+        await LastMessageModel.findOneAndUpdate(
+          {
+            $or: [
+              { senderId: friendId, receiverId: loggedInUser },
+              { senderId: loggedInUser, receiverId: friendId },
+            ],
+          },
+          { lastMessageId: newLastMessage._id }
+        );
+      } else {
+        await LastMessageModel.findOneAndDelete({
           $or: [
             { senderId: friendId, receiverId: loggedInUser },
             { senderId: loggedInUser, receiverId: friendId },
           ],
-        },
-        {
-          lastMessageId: getLastMessage._id,
-        }
-      );
-      return res.status(200).json({ isSuccess: true, message: "Message Deleted successfully", data: null });
+        });
+      }
     }
+
+    return res.status(200).json({
+      isSuccess: true,
+      message: "Message deleted successfully.",
+      data: null,
+    });
   } catch (err) {
-    console.log(err?.message);
+    console.error(err?.message);
 
     if (err.statusCode === 400) {
       return res.status(err.statusCode).json({
@@ -280,7 +294,7 @@ const deleteMessage = async (req, res) => {
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       isSuccess: false,
       message: "Server error. Please try again later.",
     });
