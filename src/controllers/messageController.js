@@ -2,7 +2,9 @@ const MessageModel = require("../models/messageModel");
 const LastMessageModel = require("../models/lastMessageModel");
 const FriendsRequestModel = require("../models/friendsRequest");
 
-const { validateSendMessage, validateGetAllMessages } = require("../validation/validate");
+const { validateSendMessage, validateGetAllMessages, validateDeleteMessage } = require("../validation/validate");
+const { findOneAndDelete } = require("../models/userModel");
+const friendsRequest = require("../models/friendsRequest");
 
 // validation check sender and receiver should be valid and should be friends and status should be accepted
 // insert message in messageModel , update last message model
@@ -72,7 +74,6 @@ const sendMessage = async (req, res) => {
         { senderId: receiverId, receiverId: senderId },
       ],
     });
-
 
     if (isLastMessageExists) {
       await LastMessageModel.updateOne(
@@ -179,7 +180,115 @@ const getAllMessages = async (req, res) => {
   }
 };
 
+// 1. Validate friendId and check if users are friends
+// 2. Check if message exists by ID
+// 3. i can delete message which i have send Delete the message
+// 4. If deleted message was the last one, update LastMessageModel to previous message
+//    - update lastmessage only when its lastmessage of total messages.
+//    - Find previous message sorted by createdAt: -1, limit: 1
+//    - Update lastMessageId in LastMessageModel
+//    -if messagecollection if empty after deleting then delete entry in lastmessage
+
+const deleteMessage = async (req, res) => {
+  try {
+    validateDeleteMessage(req);
+
+    const { friendId, messageId } = req.body;
+    const loggedInUser = req.user.id;
+    console.log(friendId, loggedInUser);
+
+    if (loggedInUser == friendId) {
+      return res.status(400).json({
+        isSuccess: false,
+        message: "Invalid ! loggedin user id and friend id cant be same.",
+      });
+    }
+
+    const isFriends = await friendsRequest.findOne({
+      $or: [
+        { senderId: friendId, receiverId: loggedInUser },
+        { senderId: loggedInUser, receiverId: friendId },
+      ],
+    });
+
+    if (!isFriends) {
+      return res.status(400).json({
+        isSuccess: false,
+        message: "Invalid ! You are not friends with this user.",
+      });
+    }
+
+    const ownMessageDelete = await MessageModel.findOne({ _id: messageId });
+
+    if (!ownMessageDelete) {
+      return res.status(400).json({
+        isSuccess: false,
+        message: "Invalid ! No message found with this Message Id.",
+      });
+    }
+
+    if (!(ownMessageDelete.senderId.toString() == loggedInUser && ownMessageDelete.receiverId.toString() == friendId)) {
+      return res.status(400).json({
+        isSuccess: false,
+        message: "Invalid ! You can delete only your messages.",
+      });
+    }
+
+    await MessageModel.findOneAndDelete({ _id: messageId });
+
+    const getLastMessage = await MessageModel.findOne({
+      $or: [
+        { senderId: friendId, receiverId: loggedInUser },
+        { senderId: loggedInUser, receiverId: friendId },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    if (!getLastMessage) {
+      // If no messages left, delete last message reference
+      await LastMessageModel.findOneAndDelete({
+        $or: [
+          { senderId: friendId, receiverId: loggedInUser },
+          { senderId: loggedInUser, receiverId: friendId },
+        ],
+      });
+
+      return res.status(200).json({ isSuccess: true, message: "Message Deleted successfully", data: null });
+    } else {
+      await LastMessageModel.findOneAndUpdate(
+        {
+          $or: [
+            { senderId: friendId, receiverId: loggedInUser },
+            { senderId: loggedInUser, receiverId: friendId },
+          ],
+        },
+        {
+          lastMessageId: getLastMessage._id,
+        }
+      );
+      return res.status(200).json({ isSuccess: true, message: "Message Deleted successfully", data: null });
+    }
+  } catch (err) {
+    console.log(err?.message);
+
+    if (err.statusCode === 400) {
+      return res.status(err.statusCode).json({
+        isSuccess: false,
+        message: err.message,
+        field: err.field,
+      });
+    }
+
+    res.status(500).json({
+      isSuccess: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
+
 module.exports = {
   sendMessage,
   getAllMessages,
+  deleteMessage,
 };

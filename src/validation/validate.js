@@ -128,6 +128,24 @@ const validateAceptOrDeclineFriendRequest = (req) => {
   }
 };
 
+const validateDeleteMessage = (req) => {
+  const { friendId,messageId } = req.body;
+    console.log(friendId,messageId,"ssssssss");
+    
+  if (!mongoose.Types.ObjectId.isValid(friendId)) {
+    const customError = new Error("invalid friendId user ID");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(messageId)) {
+    const customError = new Error("invalid messageId user ID");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+};
+
 module.exports = {
   validateSignUpData,
   validateLoginData,
@@ -135,4 +153,5 @@ module.exports = {
   validateSendMessage,
   validateGetAllMessages,
   validateAceptOrDeclineFriendRequest,
+  validateDeleteMessage
 };
