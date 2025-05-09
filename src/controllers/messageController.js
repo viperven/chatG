@@ -28,8 +28,8 @@ const sendMessage = async (req, res) => {
 
     const isReceiverFriend = await FriendsRequestModel.findOne({
       $or: [
-        { senderId: senderId, receiverId: receiverId, status: "pending" },
-        { senderId: receiverId, receiverId: senderId, status: "pending" },
+        { senderId: senderId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: senderId },
       ],
     });
 
@@ -72,9 +72,7 @@ const sendMessage = async (req, res) => {
         { senderId: receiverId, receiverId: senderId },
       ],
     });
-    console.log(senderId, receiverId, "..........");
 
-    console.log(isLastMessageExists, "isLastMessageExists");
 
     if (isLastMessageExists) {
       await LastMessageModel.updateOne(
