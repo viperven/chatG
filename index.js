@@ -35,6 +35,7 @@ app.use(
 app.use("/auth", require("./src/routes/authRoute"));
 app.use("/message", require("./src/routes/messageRoute"));
 app.use("/request", require("./src/routes/friendRequestRoute"));
+app.use("/search", require("./src/routes/searchFriendRoute"));
 
 //first connect to db then start listening to api calls
 connectDB()

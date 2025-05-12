@@ -3,22 +3,11 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const OTP = require("../models/otpModel");
-const {
-  validateSignUpData,
-  validateLoginData,
-  validateOtpData,
-} = require("../validation/validate");
-const {
-  generateRandomNumber,
-  checkOtpExpire,
-  generateOtpAndStore,
-} = require("../helper/commonFunction");
+const { faker } = require("@faker-js/faker");
+const { validateSignUpData, validateLoginData, validateOtpData } = require("../validation/validate");
+const { generateRandomNumber, checkOtpExpire, generateOtpAndStore } = require("../helper/commonFunction");
 
-const {
-  sendSignUpMail,
-  sendOTPMail,
-  sendDeleteOTPMail,
-} = require("../helper/emailService");
+const { sendSignUpMail, sendOTPMail, sendDeleteOTPMail } = require("../helper/emailService");
 
 //send otp for registration but check for new user email id should be present in db
 const sendOtp = async (req, res) => {
@@ -26,9 +15,7 @@ const sendOtp = async (req, res) => {
     const { emailID } = req.body;
 
     if (!emailID) {
-      res
-        .status(400)
-        .send({ isSuccess: false, message: "email id is required" });
+      res.status(400).send({ isSuccess: false, message: "email id is required" });
     }
     const isEmailIdExists = await User.findOne({ emailId: emailID });
 
@@ -66,7 +53,7 @@ const signUp = async (req, res) => {
   try {
     validateSignUpData(req, res); //validating request
     const { name, email, password, userOtp, age, gender, address } = req.body;
-    
+
     const isUserOtpExists = await OTP.findOne({ emailId: email });
     const isOtpExpired = checkOtpExpire(isUserOtpExists?.updatedAt);
 
@@ -169,7 +156,7 @@ const login = async (req, res) => {
       location: userExists.address,
       age: userExists.age,
       emailID: userExists.email,
-      friendsList: userExists.friends
+      friendsList: userExists.friends,
     };
 
     res.status(200).json({
@@ -187,9 +174,7 @@ const login = async (req, res) => {
       });
     }
 
-    res
-      .status(500)
-      .json({ isSuccess: false, message: "Internal Server Error" });
+    res.status(500).json({ isSuccess: false, message: "Internal Server Error" });
   }
 };
 
@@ -228,15 +213,9 @@ const forgetPassword = async (req, res) => {
     }
 
     if (step == 0) {
-      await OTP.findOneAndUpdate(
-        { emailId: emailId },
-        { otp: generateRandomNumber(4), createdAt: new Date() },
-        { upsert: true, new: true }
-      );
+      await OTP.findOneAndUpdate({ emailId: emailId }, { otp: generateRandomNumber(4), createdAt: new Date() }, { upsert: true, new: true });
       //code to send otp on mail in async way
-      return res
-        .status(200)
-        .json({ isSuccess: true, message: "otp sended sucessfully" });
+      return res.status(200).json({ isSuccess: true, message: "otp sended sucessfully" });
     }
 
     if (step == 1) {
@@ -314,15 +293,11 @@ const deleteUser = async (req, res) => {
     const { userOtp } = req.body;
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ isSuccess: false, message: "User not found!" });
+      return res.status(400).json({ isSuccess: false, message: "User not found!" });
     }
 
     if (!userOtp) {
-      return res
-        .status(400)
-        .json({ isSuccess: false, message: "otp is mandatory!" });
+      return res.status(400).json({ isSuccess: false, message: "otp is mandatory!" });
     }
 
     const isUserOtpExists = await OTP.findOne({ emailId: user?.emailId });
@@ -356,9 +331,7 @@ const deleteUser = async (req, res) => {
       User.deleteOne({ _id: userId }),
     ]);
 
-    res
-      .status(200)
-      .json({ isSuccess: true, message: "User deleted successfully" });
+    res.status(200).json({ isSuccess: true, message: "User deleted successfully" });
   } catch (err) {
     console.log(err?.message);
 
@@ -377,6 +350,39 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// randomly insert users letter comment this code
+
+const insertRandomUser = async (req, res) => {
+  try {
+    const count = parseInt(req.body.count, 10) || 50; // default to 50 users
+    const users = [];
+
+    for (let i = 0; i < count; i++) {
+      users.push({
+        name: faker.person.fullName(),
+        email: faker.internet.email().toLowerCase(),
+        password: faker.internet.password(8),
+        age: faker.number.int({ min: 8, max: 60 }),
+        gender: faker.helpers.arrayElement(["male", "female", "other"]),
+        address: faker.location.streetAddress(),
+      });
+    }
+
+    await User.insertMany(users);
+
+    res.status(200).json({
+      isSuccess: true,
+      message: `${count} users seeded successfully`,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      isSuccess: false,
+      message: "Failed to seed users",
+    });
+  }
+};
+
 module.exports = {
   signUp,
   login,
@@ -385,4 +391,5 @@ module.exports = {
   deleteUser,
   sendOtp,
   sendOtpForDeleteUser,
+  insertRandomUser
 };

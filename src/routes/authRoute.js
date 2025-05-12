@@ -8,7 +8,8 @@ const {
   forgetPassword,
   deleteUser,
   sendOtp,
-  sendOtpForDeleteUser
+  sendOtpForDeleteUser,
+  insertRandomUser
 } = require("../controllers/authController");
 
 const { userAuth } = require("../middlewares/auth");
@@ -20,5 +21,6 @@ router.get("/logout", logout);
 router.post("/updatePassword", forgetPassword);
 router.post("/sendDeleteOtp", userAuth, sendOtpForDeleteUser);
 router.post("/delete", userAuth, deleteUser);
+router.post("/insert-user", insertRandomUser);
 
 module.exports = router;
