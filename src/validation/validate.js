@@ -145,16 +145,14 @@ const validateDeleteMessage = (req) => {
   }
 };
 
-
 const validateSearchFriends = (req) => {
-  const { emailInput,suggestionCount } = req.body;
+  const { emailInput, suggestionCount } = req.query;
 
   if (!emailInput || typeof emailInput !== "string" || emailInput.trim().length < 3) {
     const customError = new Error("Invalid input! Must be a non-empty string with at least 3 characters.");
     customError.statusCode = 400;
     throw customError;
   }
-
 
   if (/[\s<>{}$;]/.test(emailInput)) {
     // Optional: Basic check to prevent injection-like patterns
@@ -163,12 +161,11 @@ const validateSearchFriends = (req) => {
     throw customError;
   }
 
-  if (typeof suggestionCount !== "number" || suggestionCount < 1 || suggestionCount > 10) {
+  if (Number(suggestionCount) < 1 || Number(suggestionCount) > 10) {
     const customError = new Error("Invalid suggestionCount! Must be a number between 1 and 10.");
     customError.statusCode = 400;
     throw customError;
   }
-  
 };
 
 module.exports = {

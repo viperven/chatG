@@ -19,7 +19,7 @@ const searchFriends = async (req, res) => {
   try {
     validateSearchFriends(req);
 
-    const { emailInput, suggestionCount } = req.body;
+    const { emailInput, suggestionCount } = req.query;
 
     const exactUserMatch = await UserModel.findOne({ email: emailInput });
 
@@ -28,7 +28,7 @@ const searchFriends = async (req, res) => {
       return res.status(200).json({
         isSuccess: true,
         message: "User Fetched successfully.",
-        data: exactUserMatch,
+        data: [exactUserMatch],
       });
     }
 
@@ -41,7 +41,7 @@ const searchFriends = async (req, res) => {
     return res.status(200).json({
       isSuccess: true,
       message: "User Fetched successfully.",
-      data: [matchingRegexUsers],
+      data: matchingRegexUsers,
     });
   } catch (err) {
     console.error(err?.message);
