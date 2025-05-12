@@ -81,7 +81,7 @@ const validateOtpData = (req) => {
 //message validation
 
 const validateSendMessage = (req) => {
-  const { receiverId, content,mediaType } = req.body;
+  const { receiverId, content, mediaType } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(receiverId)) {
     const customError = new Error("invalid receiverID user ID");
@@ -129,9 +129,9 @@ const validateAceptOrDeclineFriendRequest = (req) => {
 };
 
 const validateDeleteMessage = (req) => {
-  const { friendId,messageId } = req.body;
-    console.log(friendId,messageId,"ssssssss");
-    
+  const { friendId, messageId } = req.body;
+  console.log(friendId, messageId, "ssssssss");
+
   if (!mongoose.Types.ObjectId.isValid(friendId)) {
     const customError = new Error("invalid friendId user ID");
     customError.statusCode = 400;
@@ -143,7 +143,32 @@ const validateDeleteMessage = (req) => {
     customError.statusCode = 400;
     throw customError;
   }
+};
 
+
+const validateSearchFriends = (req) => {
+  const { emailInput,suggestionCount } = req.body;
+
+  if (!emailInput || typeof emailInput !== "string" || emailInput.trim().length < 3) {
+    const customError = new Error("Invalid input! Must be a non-empty string with at least 3 characters.");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+
+  if (/[\s<>{}$;]/.test(emailInput)) {
+    // Optional: Basic check to prevent injection-like patterns
+    const customError = new Error("Invalid characters in input.");
+    customError.statusCode = 400;
+    throw customError;
+  }
+
+  if (typeof suggestionCount !== "number" || suggestionCount < 1 || suggestionCount > 10) {
+    const customError = new Error("Invalid suggestionCount! Must be a number between 1 and 10.");
+    customError.statusCode = 400;
+    throw customError;
+  }
+  
 };
 
 module.exports = {
@@ -153,5 +178,6 @@ module.exports = {
   validateSendMessage,
   validateGetAllMessages,
   validateAceptOrDeclineFriendRequest,
-  validateDeleteMessage
+  validateDeleteMessage,
+  validateSearchFriends,
 };

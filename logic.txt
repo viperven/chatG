@@ -35,3 +35,27 @@ receiverIdId : mongodbId
 status : enum [ "accepeted", "rejected","blocked"]
 createdAt
 modifiedat
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------
+
+//modules
+
+0 : authentication and authentication [done]
+1 : search by gmail and wait for approval if send request to anyone [done]
+2 : build one to chat by _id of both parties 
+3 : maintain status like seen , last seen ,delivered , delivered but not seen 
+4 : group chat 
+5 : delete chat , unfollow , block user [delete chat done]
+6 : have privacy option to show name in global search
+
+
+Teck Stack : mern with socket.io ,tailwind
+
+opt : can use redis
+
