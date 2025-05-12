@@ -27,7 +27,7 @@ const sendOtp = async (req, res) => {
     }
 
     const otp = await generateOtpAndStore(emailID);
-    await sendOTPMail(emailID, otp?.otp);
+    // await sendOTPMail(emailID, otp?.otp);
     res.status(200).send({
       isSuccess: true,
       message: "OTP sent succesfully.",
