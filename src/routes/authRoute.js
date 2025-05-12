@@ -21,6 +21,6 @@ router.get("/logout", logout);
 router.post("/updatePassword", forgetPassword);
 router.post("/sendDeleteOtp", userAuth, sendOtpForDeleteUser);
 router.post("/delete", userAuth, deleteUser);
-router.post("/insert-user", insertRandomUser);
+// router.post("/insert-user", insertRandomUser); //uncomment only to add new users
 
 module.exports = router;
