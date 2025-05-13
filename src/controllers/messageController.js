@@ -32,7 +32,7 @@ const sendMessage = async (req, res) => {
       $or: [
         { senderId: senderId, receiverId: receiverId },
         { senderId: receiverId, receiverId: senderId },
-      ],
+      ]
     });
 
     let newMessage;

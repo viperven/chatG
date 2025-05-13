@@ -5,11 +5,12 @@ const http = require("http"); // For creating the HTTP server
 const { Server } = require("socket.io"); // Import Socket.IO
 const cors = require("cors");
 require("dotenv").config();
+const initializeSocket = require("./src/sockets/socket");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
+const io = new Server(server, { 
   cors: {
     origin: [
       "http://localhost:3000",
@@ -49,32 +50,35 @@ connectDB()
     console.log("database connection error", err);
   });
 
-// Socket.IO configuration
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+//socket 
+initializeSocket(server);
 
-  // Join room
-  socket.on("joinRoom", (roomID) => {
-    socket.join(roomID);
-    console.log(`User ${socket.id} joined room: ${roomID}`);
-  });
+// // Socket.IO configuration
+// io.on("connection", (socket) => {
+//   console.log("A user connected:", socket.id);
 
-  // Listen for chat messages and emit only to the room
-  socket.on("sendMessage", (message) => {
-    // console.log("Message received:", message);
-    const roomID = message.conversationID;
+//   // Join room
+//   socket.on("joinRoom", (roomID) => {
+//     socket.join(roomID);
+//     console.log(`User ${socket.id} joined room: ${roomID}`);
+//   });
 
-    if (roomID) {
-      // Emit message only to users in the same room
-      io.to(roomID).emit("receiveMessage", message);
-    }
-  });
+//   // Listen for chat messages and emit only to the room
+//   socket.on("sendMessage", (message) => {
+//     // console.log("Message received:", message);
+//     const roomID = message.conversationID;
 
-  // Handle disconnection
-  socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
-  });
-});
+//     if (roomID) {
+//       // Emit message only to users in the same room
+//       io.to(roomID).emit("receiveMessage", message);
+//     }
+//   });
+
+//   // Handle disconnection
+//   socket.on("disconnect", () => {
+//     console.log("A user disconnected:", socket.id);
+//   });
+// });
 
 app.get("/health", async (req, res) => {
   res.status(200).send("working fine 🔥🔥");
