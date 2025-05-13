@@ -7,6 +7,7 @@ const getSecretRoomId = (userId, targetUserId) => {
 };
 
 const initializeSocket = (server) => {
+
   const io = socket(server, {
     cors: {
       origin: "http://localhost:5173",
@@ -14,7 +15,8 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    socket.on("joinChat", async ({ firstName, userId, targetUserId }) => {
+
+    socket.on("joinRoom", async ({ firstName, userId, targetUserId }) => {
       const isFriends = await UserModel.findOne({
         $or: [
           { senderId: userId, receiverId: targetUserId, status: "accepted" },
