@@ -1,6 +1,6 @@
 const socket = require("socket.io");
 const crypto = require("crypto");
-const UserModel = require("../models/userModel");
+const FriendRequestModel = require("../models/friendsRequest");
 
 const getSecretRoomId = (userId, targetUserId) => {
   //to ger encrypter roomid to join
@@ -20,7 +20,7 @@ const initializeSocket = (server) => {
     socket.on("joinRoom", async ({ firstName, userId, targetUserId }) => {
       console.log(firstName, userId, targetUserId);
 
-      const isFriends = await UserModel.findOne({
+      const isFriends = await FriendRequestModel.findOne({
         $or: [
           { senderId: userId, receiverId: targetUserId, status: "accepted" },
           { senderId: targetUserId, receiverId: userId, status: "accepted" },
