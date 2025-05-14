@@ -10,17 +10,17 @@ const initializeSocket = require("./src/sockets/socket");
 const PORT = process.env.PORT || 5000;
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { 
-  cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://mydevtinder.netlify.app",
-    ],
-    methods: ["GET", "POST"],
-  },
-});
-app.set("io", io);
+// const io = new Server(server, { 
+//   cors: {
+//     origin: [
+//       "http://localhost:3000",
+//       "http://localhost:5173",
+//       "https://mydevtinder.netlify.app",
+//     ],
+//     methods: ["GET", "POST"],
+//   },
+// });
+// app.set("io", io);
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -37,6 +37,7 @@ app.use("/auth", require("./src/routes/authRoute"));
 app.use("/message", require("./src/routes/messageRoute"));
 app.use("/request", require("./src/routes/friendRequestRoute"));
 app.use("/search", require("./src/routes/searchFriendRoute"));
+app.use("/profile", require("./src/routes/profileRoute"));
 
 //first connect to db then start listening to api calls
 connectDB()
