@@ -3,11 +3,11 @@ const crypto = require("crypto");
 const UserModel = require("../models/userModel");
 
 const getSecretRoomId = (userId, targetUserId) => {
+  //to ger encrypter roomid to join
   return crypto.createHash("sha256").update([userId, targetUserId].sort().join("$")).digest("hex");
 };
 
 const initializeSocket = (server) => {
-
   const io = socket(server, {
     cors: {
       origin: "http://localhost:5173",
@@ -15,14 +15,18 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
+    console.log("connection start");
 
     socket.on("joinRoom", async ({ firstName, userId, targetUserId }) => {
+      console.log(firstName, userId, targetUserId);
+
       const isFriends = await UserModel.findOne({
         $or: [
           { senderId: userId, receiverId: targetUserId, status: "accepted" },
           { senderId: targetUserId, receiverId: userId, status: "accepted" },
         ],
       });
+      console.log(isFriends, isFriends);
 
       if (!isFriends) {
         socket.emit("unauthorizedJoin", { error: "Invalid users. Not friends." });
