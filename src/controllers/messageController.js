@@ -32,7 +32,7 @@ const sendMessage = async (req, res) => {
       $or: [
         { senderId: senderId, receiverId: receiverId },
         { senderId: receiverId, receiverId: senderId },
-      ]
+      ],
     });
 
     let newMessage;
@@ -115,10 +115,10 @@ const getAllMessages = async (req, res) => {
   try {
     validateGetAllMessages(req);
 
-    const { senderId, limit = 20, page = 1 } = req.query;
+    const { friendId, limit = 20, page = 1 } = req.query;
     const receiverId = req.user.id;
 
-    if (receiverId == senderId) {
+    if (receiverId == friendId) {
       //can't send message to our self
       return res.status(400).json({
         isSuccess: false,
@@ -128,8 +128,8 @@ const getAllMessages = async (req, res) => {
 
     const isReceiverFriend = await FriendsRequestModel.findOne({
       $or: [
-        { senderId: senderId, receiverId: receiverId },
-        { senderId: receiverId, receiverId: senderId },
+        { senderId: friendId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: friendId },
       ],
     });
 
@@ -153,8 +153,8 @@ const getAllMessages = async (req, res) => {
 
     const getAllMessages = await MessageModel.find({
       $or: [
-        { senderId: senderId, receiverId: receiverId },
-        { senderId: receiverId, receiverId: senderId },
+        { senderId: friendId, receiverId: receiverId },
+        { senderId: receiverId, receiverId: friendId },
       ],
     })
       .sort({ createdAt: -1 })
@@ -225,7 +225,6 @@ const deleteMessage = async (req, res) => {
         message: "Invalid! No message found with this Message ID.",
       });
     }
-
 
     if (message.senderId.toString() !== loggedInUser || message.receiverId.toString() !== friendId) {
       return res.status(400).json({
