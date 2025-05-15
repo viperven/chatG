@@ -158,7 +158,7 @@ const getAllMessages = async (req, res) => {
         { senderId: receiverId, receiverId: friendId },
       ],
     })
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: 1 })
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .populate("senderId", "name email age gender photoUrl")
