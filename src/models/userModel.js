@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    photoUrl: {
+      type: String,
+      default: "https://geographyandyou.com/images/user-profile.png",
+      validate: {
+        validator: (url) => validator.isURL(url),
+        message: "Invalid URL",
+      },
+    },
     friends: {
       type: [mongoose.Schema.Types.ObjectId],
     },
@@ -43,8 +51,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-
 
 userSchema.index({ email: 1 }, { unique: true });
 
@@ -70,10 +76,7 @@ userSchema.methods.generateAuthToken = async function () {
 userSchema.methods.validatePassword = async function (userEnteredPassword) {
   const user = this;
 
-  const ispasswordMatched = await bcrypt.compare(
-    userEnteredPassword,
-    user.password
-  );
+  const ispasswordMatched = await bcrypt.compare(userEnteredPassword, user.password);
   return ispasswordMatched;
 };
 

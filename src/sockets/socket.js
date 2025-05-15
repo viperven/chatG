@@ -26,7 +26,6 @@ const initializeSocket = (server) => {
           { senderId: targetUserId, receiverId: userId, status: "accepted" },
         ],
       });
-      console.log(isFriends, isFriends);
 
       if (!isFriends) {
         socket.emit("unauthorizedJoin", { error: "Invalid users. Not friends." });

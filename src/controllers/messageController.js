@@ -111,6 +111,7 @@ const sendMessage = async (req, res) => {
 // also check if last message exists in db then decerement the count
 // and update the last message model with the last message id and unread count 0
 
+//get all messages by user and friend id
 const getAllMessages = async (req, res) => {
   try {
     validateGetAllMessages(req);
@@ -159,7 +160,9 @@ const getAllMessages = async (req, res) => {
     })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate("senderId", "name email age gender photoUrl")
+      .populate("receiverId", "name email age gender photoUrl")
 
     return res.status(200).json({ isSuccess: true, message: "Message fetched successfully", data: getAllMessages });
   } catch (err) {
