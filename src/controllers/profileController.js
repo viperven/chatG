@@ -13,6 +13,7 @@ const view = async (req, res) => {
       age: user?.age,
       friends: user?.friends,
       groups: user?.groups,
+      photoUrl:user?.photoUrl
     };
 
     res.status(200).json({

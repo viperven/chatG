@@ -15,7 +15,6 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("connection start");
 
     socket.on("joinRoom", async ({ firstName, userId, targetUserId }) => {
       console.log(firstName, userId, targetUserId);
@@ -37,13 +36,13 @@ const initializeSocket = (server) => {
       socket.join(roomId);
     });
 
-    socket.on("sendMessage", async ({ firstName, lastName, userId, targetUserId, text }) => {
+    socket.on("sendMessage", async (userId, targetUserId,savedMessage) => {
       // Save messages to the database
       try {
+        console.log("send message",userId, targetUserId,savedMessage);
+        
         const roomId = getSecretRoomId(userId, targetUserId);
-        console.log(firstName + " " + text);
-
-        io.to(roomId).emit("messageReceived", { firstName, lastName, text });
+        io.to(roomId).emit("receiveMessage", savedMessage);
       } catch (err) {
         console.log(err);
       }

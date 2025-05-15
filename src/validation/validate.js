@@ -105,8 +105,7 @@ const validateSendMessage = (req) => {
 const validateGetAllMessages = (req) => {
   const { friendId } = req.query;
 
-   
-  if (!mongoose.Types.ObjectId.isValid(friendId)) { 
+  if (!mongoose.Types.ObjectId.isValid(friendId)) {
     const customError = new Error("invalid friendId user ID");
     customError.statusCode = 400;
     throw customError;
