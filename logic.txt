@@ -1,3 +1,5 @@
+
+
 1. User A sends message to B
    → insert into messages
    → update (or upsert) lastMessages {senderId: A, receiverId: B}
@@ -48,7 +50,7 @@ modifiedat
 
 0 : authentication and authentication [done]
 1 : search by gmail and wait for approval if send request to anyone [done]
-2 : build one to chat by _id of both parties using sockets with own api
+2 : build one to chat by _id of both parties using sockets with own api [done]
 3 : maintain status like seen , last seen ,delivered , delivered but not seen 
 4 : group chat 
 5 : delete chat , unfollow , block user [delete chat done]
@@ -59,3 +61,26 @@ Teck Stack : mern with socket.io ,tailwind
 
 opt : can use redis
 
+
+
+// two scenerios for update message seen
+
+1: when both user is live and connected to socket when emitting send message then make then seen directly
+
+2: when receiver is offline then ?
+
+from get allmessage all message will be fetched suppose 50 messages that has status sent so i will sent message and in async after sending respose i will mark them deilved
+ in db but user can see has seen last 10 message in its viewport 
+so i was thinking to update that only that messages to seen which is inside viewport i will fire api to send that messages ids to be seen 
+
+like this thinking to fire an api
+<InView
+  as="div"
+  onChange={(inView, entry) => {
+    if (inView && !message.isRead) {
+      socket.emit("messageSeen", message._id);
+    }
+  }}
+>
+  <MessageCard {...message} />
+</InView>

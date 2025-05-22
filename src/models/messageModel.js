@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const messageSchema = new mongoose.Schema(
   {
     senderId: {
@@ -26,6 +25,11 @@ const messageSchema = new mongoose.Schema(
       enum: ["text", "image", "video"],
       default: "text",
     },
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "seen"],
+      default: "sent",
+    },
   },
   { timestamps: true }
 );
@@ -34,6 +38,5 @@ const message = mongoose.model("message", messageSchema);
 
 messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 }); // Private
 messageSchema.index({ groupId: 1, createdAt: -1 }); // Group
-
 
 module.exports = message;
